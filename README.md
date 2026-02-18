@@ -154,3 +154,4 @@ Based on the original Doodle God game. All combinations sourced from the Doodle 
 3. Run the app:
    `npm run dev`
 # Infinite-Alchemy
+# Infinite-Alchemy
