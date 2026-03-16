@@ -11,175 +11,190 @@ interface CombinationAreaProps {
   showFailed: boolean;
 }
 
+const SKY   = { main: '#9956DE', light: '#C49AEF', dark: '#6B2FAF' };
+const ROSE  = { main: '#FF9A2E', light: '#FFD09E', dark: '#C06010' };
+const SAGE  = { main: '#5BC94E', light: '#A8E89E', dark: '#2E8A24' };
+
 const CombinationArea: React.FC<CombinationAreaProps> = ({
   slot1, slot2, result, onClearSlot, isProcessing, showFailed,
 }) => {
-  const slot1Color = slot1?.group ? (GROUP_INFO[slot1.group]?.color || 'var(--gold)') : 'var(--gold)';
-  const slot2Color = slot2?.group ? (GROUP_INFO[slot2.group]?.color || 'var(--violet)') : 'var(--violet)';
+  const slot1Color = slot1?.group ? (GROUP_INFO[slot1.group]?.color || SKY.main) : SKY.main;
+  const slot2Color = slot2?.group ? (GROUP_INFO[slot2.group]?.color || ROSE.main) : ROSE.main;
   const bothFilled = slot1 && slot2;
 
   return (
-    <div className="combo-zone">
-      {/* Label */}
+    <div className="combo-center">
+      {/* Title */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        marginBottom: '10px', gap: '8px',
+        fontFamily: 'Cinzel, serif',
+        fontSize: '9px',
+        letterSpacing: '0.18em',
+        textTransform: 'uppercase',
+        color: 'var(--text-d)',
+        textAlign: 'center',
+        marginBottom: '4px',
       }}>
-        <div style={{
-          height: '1px', flex: 1,
-          background: 'linear-gradient(90deg, transparent, var(--border))',
-        }} />
-        <span style={{
-          fontFamily: 'Cinzel, serif', fontSize: '9.5px',
-          letterSpacing: '0.18em', color: 'var(--text-d)',
-          textTransform: 'uppercase',
-        }}>
-          Combination Chamber
-        </span>
-        <div style={{
-          height: '1px', flex: 1,
-          background: 'linear-gradient(90deg, var(--border), transparent)',
-        }} />
+        Combine
       </div>
 
-      {/* Slots row */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '6px',
-        justifyContent: 'center',
-      }}>
-
-        {/* ─── SLOT 1 ─── */}
-        <div
-          className={`slot-card${slot1 ? ' filled-1' : ''}`}
-          onClick={slot1 ? () => onClearSlot(1) : undefined}
-          style={slot1 ? {
-            borderColor: slot1Color,
-            boxShadow: `0 0 14px ${slot1Color}55, inset 0 0 12px rgba(0,0,0,0.4)`,
-            background: `${slot1Color}18`,
-          } : {}}
-        >
-          <span className="slot-label" style={{ color: slot1 ? slot1Color : 'var(--text-d)' }}>
-            Element I
-          </span>
-          {slot1 ? (
-            <>
-              <div className="slot-emoji">{slot1.emoji}</div>
-              <div className="slot-name" style={{ color: 'var(--text)' }}>{slot1.name}</div>
-              <div className="slot-hint">tap to clear</div>
-            </>
-          ) : (
-            <>
-              <div className="slot-placeholder">?</div>
-              <div className="slot-placeholder-text">tap an element below</div>
-            </>
-          )}
-        </div>
-
-        {/* ─── PLUS ─── */}
-        <div className="combo-sep" style={{ opacity: bothFilled ? 1 : 0.3 }}>
-          <span style={{ fontSize: '20px', fontWeight: 700 }}>+</span>
-        </div>
-
-        {/* ─── SLOT 2 ─── */}
-        <div
-          className={`slot-card${slot2 ? ' filled-2' : ''}`}
-          onClick={slot2 ? () => onClearSlot(2) : undefined}
-          style={slot2 ? {
-            borderColor: slot2Color,
-            boxShadow: `0 0 14px ${slot2Color}55, inset 0 0 12px rgba(0,0,0,0.4)`,
-            background: `${slot2Color}18`,
-          } : {}}
-        >
-          <span className="slot-label" style={{ color: slot2 ? slot2Color : 'var(--text-d)' }}>
-            Element II
-          </span>
-          {slot2 ? (
-            <>
-              <div className="slot-emoji">{slot2.emoji}</div>
-              <div className="slot-name" style={{ color: 'var(--text)' }}>{slot2.name}</div>
-              <div className="slot-hint">tap to clear</div>
-            </>
-          ) : (
-            <>
-              <div className="slot-placeholder">?</div>
-              <div className="slot-placeholder-text">
-                {slot1 ? 'now pick second' : 'pick element first'}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* ─── ARROW ─── */}
-        <div className="combo-sep" style={{ opacity: bothFilled ? 1 : 0.25 }}>
-          <span style={{ fontSize: '16px' }}>→</span>
-        </div>
-
-        {/* ─── RESULT ─── */}
-        {isProcessing ? (
-          <div className="result-card processing">
-            <div style={{ position: 'relative', width: '44px', height: '44px', marginBottom: '6px' }}>
-              <div className="anim-spin" style={{
-                position: 'absolute', inset: 0,
-                border: '2px solid rgba(155,93,229,0.3)',
-                borderTopColor: 'var(--violet)',
-                borderRadius: '50%',
-              }} />
-              <div className="anim-spinrev" style={{
-                position: 'absolute', inset: '8px',
-                border: '1px solid rgba(232,169,48,0.25)',
-                borderBottomColor: 'var(--gold)',
-                borderRadius: '50%',
-              }} />
-              <div style={{
-                position: 'absolute', inset: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '18px',
-              }}>⚗️</div>
+      {/* Slot 1 */}
+      <div
+        className={`v-slot-card${slot1 ? ' filled' : ''}`}
+        onClick={slot1 ? () => onClearSlot(1) : undefined}
+        style={slot1 ? {
+          borderColor: SKY.main,
+          background: `rgba(153,86,222,0.08)`,
+          boxShadow: `0 0 0 2.5px rgba(153,86,222,0.25), 0 3px 14px rgba(153,86,222,0.15)`,
+        } : {}}
+      >
+        <span className="v-slot-label" style={{ color: slot1 ? SKY.dark : 'var(--text-d)' }}>
+          Element I
+        </span>
+        {slot1 ? (
+          <>
+            <div style={{ fontSize: '26px', lineHeight: 1, marginBottom: '3px' }}>{slot1.emoji}</div>
+            <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '11px', fontWeight: 700, textAlign: 'center', color: 'var(--text)', lineHeight: 1.2 }}>
+              {slot1.name}
             </div>
-            <span style={{ fontFamily: 'Cinzel, serif', fontSize: '9px', letterSpacing: '0.18em', color: 'var(--violet)' }}>
-              MIXING...
-            </span>
-          </div>
-        ) : showFailed ? (
-          <div className="result-card anim-shake" style={{
-            border: '2px solid var(--border-b)',
-            background: 'rgba(255,255,255,0.04)',
-          }}>
-            <div style={{ fontSize: '28px', marginBottom: '5px', opacity: 0.7 }}>💨</div>
-            <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '11px', fontWeight: 700, color: 'var(--text-m)', textAlign: 'center', padding: '0 6px' }}>
-              No reaction
-            </div>
-          </div>
-        ) : result ? (
-          <div className="result-card has-result anim-bloom">
-            <span className="slot-label" style={{ color: 'var(--teal)' }}>Result</span>
-            <div className="slot-emoji">{result.emoji}</div>
-            <div className="slot-name" style={{ color: 'var(--teal)' }}>{result.name}</div>
-            <div style={{ marginTop: '3px', fontFamily: 'Nunito, sans-serif', fontSize: '9px', fontWeight: 800, color: 'var(--teal)', letterSpacing: '0.1em' }}>
-              ✦ FOUND
-            </div>
-          </div>
+            <div style={{ fontSize: '9px', color: SKY.main, marginTop: '2px', fontWeight: 600 }}>tap to clear</div>
+          </>
         ) : (
-          <div className="result-card">
-            <span className="slot-label" style={{ color: 'var(--text-d)' }}>Result</span>
-            <div className="slot-placeholder">✦</div>
-            <div className="slot-placeholder-text">
-              {bothFilled ? 'combining...' : 'awaiting mix'}
+          <>
+            <div style={{ fontSize: '20px', opacity: 0.12 }}>?</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-d)', textAlign: 'center', padding: '0 6px', lineHeight: 1.3, fontWeight: 600 }}>
+              pick from left
             </div>
-          </div>
+          </>
         )}
       </div>
 
-      {/* Instruction hint */}
+      {/* Plus */}
+      <div className="v-sep" style={{ opacity: bothFilled ? 0.8 : 0.25 }}>
+        <span style={{ fontSize: '16px', color: 'var(--text-d)', fontWeight: 700 }}>+</span>
+      </div>
+
+      {/* Slot 2 */}
+      <div
+        className={`v-slot-card${slot2 ? ' filled' : ''}`}
+        onClick={slot2 ? () => onClearSlot(2) : undefined}
+        style={slot2 ? {
+          borderColor: ROSE.main,
+          background: `rgba(255,154,46,0.08)`,
+          boxShadow: `0 0 0 2.5px rgba(255,154,46,0.25), 0 3px 14px rgba(255,154,46,0.15)`,
+        } : {}}
+      >
+        <span className="v-slot-label" style={{ color: slot2 ? ROSE.dark : 'var(--text-d)' }}>
+          Element II
+        </span>
+        {slot2 ? (
+          <>
+            <div style={{ fontSize: '26px', lineHeight: 1, marginBottom: '3px' }}>{slot2.emoji}</div>
+            <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '11px', fontWeight: 700, textAlign: 'center', color: 'var(--text)', lineHeight: 1.2 }}>
+              {slot2.name}
+            </div>
+            <div style={{ fontSize: '9px', color: ROSE.main, marginTop: '2px', fontWeight: 600 }}>tap to clear</div>
+          </>
+        ) : (
+          <>
+            <div style={{ fontSize: '20px', opacity: 0.12 }}>?</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-d)', textAlign: 'center', padding: '0 6px', lineHeight: 1.3, fontWeight: 600 }}>
+              {slot1 ? 'pick from right' : 'pick from right'}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Arrow */}
+      <div className="v-sep" style={{ opacity: bothFilled ? 0.7 : 0.2 }}>
+        <span style={{ fontSize: '14px', color: 'var(--text-d)' }}>↓</span>
+      </div>
+
+      {/* Result */}
+      {isProcessing ? (
+        <div className="v-result-card" style={{ borderColor: 'rgba(78,142,106,0.5)', background: 'rgba(78,142,106,0.06)' }}>
+          <div style={{ position: 'relative', width: '40px', height: '40px', marginBottom: '5px' }}>
+            <div className="anim-spin" style={{
+              position: 'absolute', inset: 0,
+              border: '2px solid rgba(78,142,106,0.2)',
+              borderTopColor: SAGE.main,
+              borderRadius: '50%',
+            }} />
+            <div className="anim-spinrev" style={{
+              position: 'absolute', inset: '8px',
+              border: '1px solid rgba(74,127,193,0.2)',
+              borderBottomColor: SKY.main,
+              borderRadius: '50%',
+            }} />
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '16px',
+            }}>⚗️</div>
+          </div>
+          <span style={{ fontFamily: 'Cinzel, serif', fontSize: '8px', letterSpacing: '0.18em', color: SAGE.dark }}>
+            MIXING...
+          </span>
+        </div>
+      ) : showFailed ? (
+        <div className="v-result-card anim-shake" style={{
+          borderColor: 'rgba(194,98,79,0.4)',
+          background: 'rgba(194,98,79,0.06)',
+        }}>
+          <div style={{ fontSize: '24px', marginBottom: '4px', opacity: 0.5 }}>💨</div>
+          <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '10px', fontWeight: 700, color: 'var(--text-m)', textAlign: 'center' }}>
+            No reaction
+          </div>
+        </div>
+      ) : result ? (
+        <div className="v-result-card anim-bloom" style={{
+          borderColor: SAGE.main,
+          background: `rgba(91,201,78,0.08)`,
+          boxShadow: `0 0 0 2.5px rgba(91,201,78,0.3), 0 4px 16px rgba(91,201,78,0.2)`,
+        }}>
+          <span className="v-slot-label" style={{ color: SAGE.dark }}>Result</span>
+          <div style={{ fontSize: '28px', lineHeight: 1, marginBottom: '4px' }}>{result.emoji}</div>
+          <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '11px', fontWeight: 700, color: SAGE.dark, textAlign: 'center' }}>
+            {result.name}
+          </div>
+          <div style={{ fontSize: '9px', fontWeight: 800, color: SAGE.main, letterSpacing: '0.08em', marginTop: '2px' }}>
+            ✦ FOUND
+          </div>
+        </div>
+      ) : (
+        <div className="v-result-card">
+          <span className="v-slot-label" style={{ color: 'var(--text-d)' }}>Result</span>
+          <div style={{ fontSize: '20px', opacity: 0.1 }}>✦</div>
+          <div style={{ fontSize: '10px', color: 'var(--text-d)', textAlign: 'center', padding: '0 6px', lineHeight: 1.3, fontWeight: 600 }}>
+            awaiting mix
+          </div>
+        </div>
+      )}
+
+      {/* Divider + stats */}
       <div style={{
-        textAlign: 'center', marginTop: '8px',
-        fontFamily: 'Nunito, sans-serif', fontSize: '11px',
-        color: 'var(--text-d)', fontWeight: 600,
-        minHeight: '16px',
+        width: '100%',
+        borderTop: '1px solid var(--border)',
+        marginTop: '8px',
+        paddingTop: '10px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4px',
+        alignItems: 'center',
       }}>
-        {!slot1 && !slot2 && 'Tap any element below to add it to slot I'}
-        {slot1 && !slot2 && `${slot1.emoji} ${slot1.name} selected — now pick Element II`}
-        {slot1 && slot2 && !result && !isProcessing && !showFailed && `Combining ${slot1.name} + ${slot2.name}...`}
+        {/* Hint text */}
+        <div style={{
+          fontFamily: 'Nunito, sans-serif',
+          fontSize: '10px',
+          color: 'var(--text-d)',
+          fontWeight: 600,
+          textAlign: 'center',
+          lineHeight: 1.4,
+          minHeight: '14px',
+        }}>
+          {!slot1 && !slot2 && 'Select from left & right panels'}
+          {slot1 && !slot2 && `${slot1.emoji} ready — pick element II →`}
+          {slot1 && slot2 && !result && !isProcessing && !showFailed && `Combining…`}
+        </div>
       </div>
     </div>
   );

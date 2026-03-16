@@ -32,13 +32,13 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({ isOpen, onClose, history 
           padding: '14px 16px',
           borderBottom: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: 'rgba(13,11,20,0.8)',
+          background: 'var(--card)',
           flexShrink: 0,
         }}>
           <div>
             <div style={{
               fontFamily: 'Cinzel, serif', fontSize: '14px', fontWeight: 700,
-              color: 'var(--gold-b)', letterSpacing: '0.08em',
+              color: 'var(--sky-d)', letterSpacing: '0.08em',
             }}>
               📜 Grimoire
             </div>
