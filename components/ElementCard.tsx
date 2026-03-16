@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { ElementItem } from '../types';
+import { GROUP_INFO } from '../constants';
 
 interface ElementCardProps {
   element: ElementItem;
@@ -11,41 +11,80 @@ interface ElementCardProps {
   isNew?: boolean;
 }
 
-const ElementCard: React.FC<ElementCardProps> = ({ 
-  element, 
-  isSelected, 
-  selectionIndex, 
-  onClick, 
-  className = "",
-  isNew 
+// Parse a hex color to rgba string
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+const ElementCard: React.FC<ElementCardProps> = ({
+  element, isSelected, selectionIndex, onClick, className = '', isNew,
 }) => {
-  const selectionStyles = isSelected 
-    ? selectionIndex === 1 
-      ? "ring-2 ring-yellow-400 bg-yellow-900/40 shadow-[0_0_15px_rgba(250,204,21,0.5)]" 
-      : "ring-2 ring-blue-400 bg-blue-900/40 shadow-[0_0_15px_rgba(96,165,250,0.5)]"
-    : "bg-gray-800 hover:bg-gray-700 active:scale-95 border border-gray-700";
+  const groupColor = element.group ? (GROUP_INFO[element.group]?.color || '#5A5068') : '#5A5068';
+
+  // Build tile styles based on state
+  let extraStyle: React.CSSProperties = {};
+  let extraClass = '';
+
+  if (isSelected && selectionIndex === 1) {
+    extraStyle = {
+      background: `rgba(232,169,48,0.18)`,
+      borderColor: 'var(--gold)',
+    };
+    extraClass = ' sel-1';
+  } else if (isSelected && selectionIndex === 2) {
+    extraStyle = {
+      background: `rgba(155,93,229,0.18)`,
+      borderColor: 'var(--violet)',
+    };
+    extraClass = ' sel-2';
+  } else if (isNew) {
+    extraStyle = {
+      background: hexToRgba(groupColor, 0.18),
+      borderColor: 'var(--teal)',
+    };
+    extraClass = ' is-new';
+  } else {
+    // Normal state: tint with group color for visual variety
+    extraStyle = {
+      background: hexToRgba(groupColor, 0.10),
+      borderColor: hexToRgba(groupColor, 0.28),
+    };
+  }
 
   return (
-    <div 
+    <div
+      className={`el-tile${extraClass}${className ? ' ' + className : ''}`}
+      style={extraStyle}
       onClick={onClick}
-      className={`
-        ${selectionStyles}
-        ${isNew ? "animate-pulse border-green-500" : ""}
-        relative flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer transition-all duration-200 
-        group ${className}
-      `}
+      title={element.name}
     >
-      <span className="text-xl group-hover:scale-125 transition-transform duration-200">
-        {element.emoji}
-      </span>
-      <span className="text-sm font-medium whitespace-nowrap">
-        {element.name}
-      </span>
-      {element.isCustom && (
-        <span className="absolute -top-1 -right-1 text-[10px] bg-indigo-600 text-white rounded-full px-1 py-0.5 shadow">
-          ✨
+      {isNew && !isSelected && (
+        <span className="new-badge">✦ new</span>
+      )}
+      {isSelected && (
+        <span
+          className="sel-badge"
+          style={{
+            color: selectionIndex === 1 ? 'var(--gold-b)' : '#c090ff',
+            background: selectionIndex === 1 ? 'rgba(232,169,48,0.18)' : 'rgba(155,93,229,0.18)',
+          }}
+        >
+          {selectionIndex}
         </span>
       )}
+
+      <div className="el-emoji">{element.emoji}</div>
+      <div className="el-name">{element.name}</div>
+
+      {/* Group color bar at bottom */}
+      <div
+        className="group-bar"
+        style={{ background: hexToRgba(groupColor, 0.75) }}
+      />
     </div>
   );
 };

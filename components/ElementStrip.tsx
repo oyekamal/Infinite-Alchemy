@@ -1,138 +1,144 @@
 import React from 'react';
 import { ElementItem, ElementGroup } from '../types';
+import { GROUP_INFO } from '../constants';
+import ElementCard from './ElementCard';
 
 interface ElementStripProps {
   elements: ElementItem[];
   onSelect: (element: ElementItem) => void;
-  selectedElement: ElementItem | null;
-  compatibleNames: string[];
-  groupProgress: Record<ElementGroup, { current: number; total: number }>;
+  slot1: ElementItem | null;
+  slot2: ElementItem | null;
+  newlyUnlocked: string[];
+  selectedGroup: ElementGroup | 'All';
+  // legacy compat
+  selectedElement?: ElementItem | null;
+  compatibleNames?: string[];
+  groupProgress?: any;
 }
 
-const GROUP_COLORS: Record<string, string> = {
-  'Basic': '#6b7280',
-  'Fire': '#ef4444',
-  'Water': '#3b82f6',
-  'Liquids': '#3b82f6',
-  'Earth': '#22c55e',
-  'Air': '#fbbf24',
-  'Energy': '#a855f7',
-  'Life': '#10b981',
-  'Plants': '#22c55e',
-  'Animals': '#f59e0b',
-  'Invertebrates': '#9333ea',
-  'Technology': '#06b6d4',
-  'Magic': '#8b5cf6',
-  'Custom': '#6366f1',
-};
-
-// Get color for any group (with fallback)
-const getGroupColor = (group: string): string => {
-  return GROUP_COLORS[group] || '#6b7280';
-};
+const SectionHeader: React.FC<{ color: string; icon: string; label: string; count: number }> = ({
+  color, icon, label, count,
+}) => (
+  <div className="group-section-header">
+    <span style={{ color, fontSize: '15px' }}>{icon}</span>
+    <span style={{ color, fontWeight: 700 }}>{label}</span>
+    <span style={{ fontSize: '10px', color: 'var(--text-d)', fontWeight: 600 }}>{count}</span>
+    <div className="bar" style={{ background: `linear-gradient(90deg, ${color}50, transparent)` }} />
+  </div>
+);
 
 const ElementStrip: React.FC<ElementStripProps> = ({
-  elements,
-  onSelect,
-  selectedElement,
-  compatibleNames,
-  groupProgress,
+  elements, onSelect, slot1, slot2, newlyUnlocked, selectedGroup,
 }) => {
-  // Group elements by their group
-  const groupedElements: Record<string, ElementItem[]> = {};
+  if (elements.length === 0) {
+    return (
+      <div className="element-grid-wrap">
+        <div className="element-grid">
+          <div className="empty-state">
+            <span style={{ fontSize: '38px', opacity: 0.15 }}>🔮</span>
+            <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: '14px', fontWeight: 700, color: 'var(--text-m)' }}>
+              Nothing found
+            </span>
+            <span style={{ fontSize: '12px', color: 'var(--text-d)' }}>
+              Try a different group or clear your search
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Helper: determine if an element is selected
+  const selectionIndex = (el: ElementItem): 1 | 2 | undefined =>
+    slot1?.name === el.name ? 1 : slot2?.name === el.name ? 2 : undefined;
+
+  const renderCard = (el: ElementItem) => (
+    <ElementCard
+      key={el.name}
+      element={el}
+      isSelected={slot1?.name === el.name || slot2?.name === el.name}
+      selectionIndex={selectionIndex(el)}
+      isNew={newlyUnlocked.includes(el.name)}
+      onClick={() => onSelect(el)}
+    />
+  );
+
+  // ── Single group view ────────────────────────────────────────────────────
+  if (selectedGroup !== 'All') {
+    // Sort: newly unlocked first, then alphabetical
+    const sorted = [...elements].sort((a, b) => {
+      const aNew = newlyUnlocked.includes(a.name);
+      const bNew = newlyUnlocked.includes(b.name);
+      if (aNew && !bNew) return -1;
+      if (!aNew && bNew) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    const info = GROUP_INFO[selectedGroup];
+    return (
+      <div className="element-grid-wrap">
+        <div className="element-grid">
+          {info && (
+            <SectionHeader
+              color={info.color}
+              icon={info.icon}
+              label={info.name}
+              count={sorted.length}
+            />
+          )}
+          {sorted.map(renderCard)}
+        </div>
+      </div>
+    );
+  }
+
+  // ── All elements view ────────────────────────────────────────────────────
+  // 1. If there are newly unlocked elements, show them first in a "Recent" section
+  const recentEls = elements.filter(el => newlyUnlocked.includes(el.name));
+
+  // 2. Group remaining elements by their group
+  const grouped: Record<string, ElementItem[]> = {};
   elements.forEach(el => {
-    const group = el.group || 'Custom';
-    if (!groupedElements[group]) {
-      groupedElements[group] = [];
-    }
-    groupedElements[group].push(el);
+    const g = el.group || 'Custom';
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push(el);
   });
 
-  // Get all groups that actually exist in the data
-  const allGroups = Object.keys(groupedElements);
-  
-  // Preferred order (groups will appear in this order if they exist, others will follow)
-  const preferredOrder = ['Basic', 'Fire', 'Liquids', 'Water', 'Earth', 'Air', 'Energy', 'Life', 'Plants', 'Animals', 'Invertebrates', 'Technology', 'Magic', 'Custom'];
-  
-  // Sort: preferred groups first (in order), then alphabetically for others
-  const sortedGroups = allGroups.sort((a, b) => {
-    const aIndex = preferredOrder.indexOf(a);
-    const bIndex = preferredOrder.indexOf(b);
-    
-    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-    if (aIndex !== -1) return -1;
-    if (bIndex !== -1) return 1;
-    return a.localeCompare(b);
-  });
+  const groupOrder = Object.keys(GROUP_INFO) as ElementGroup[];
+  const sortedGroups = groupOrder.filter(g => grouped[g]?.length > 0);
 
   return (
-    <div className="w-full bg-gray-900/50 border-b border-gray-800 overflow-x-auto overflow-y-hidden">
-      <div className="flex items-stretch min-w-max p-4 gap-2">
-        {sortedGroups.map((group) => {
-          const groupElements = groupedElements[group];
-          const color = getGroupColor(group);
-          const progress = groupProgress[group as ElementGroup];
-          const progressPercent = progress ? (progress.current / progress.total) * 100 : 0;
+    <div className="element-grid-wrap">
+      <div className="element-grid">
+        {/* Recent discoveries section */}
+        {recentEls.length > 0 && (
+          <>
+            <SectionHeader
+              color="var(--teal)"
+              icon="✦"
+              label="Recently Discovered"
+              count={recentEls.length}
+            />
+            {recentEls.map(renderCard)}
+          </>
+        )}
 
+        {/* Elements by group */}
+        {sortedGroups.map(group => {
+          const info = GROUP_INFO[group];
+          const els = grouped[group];
           return (
-            <div key={group} className="flex items-stretch gap-2">
-              {/* Group Divider with Progress */}
-              <div className="flex flex-col items-center justify-center px-2">
-                <div className="writing-mode-vertical text-xs font-bold tracking-wider uppercase opacity-60 mb-2" style={{ color }}>
-                  {group}
-                </div>
-                <div className="w-1 flex-1 bg-gray-800 rounded-full overflow-hidden">
-                  <div
-                    className="w-full transition-all duration-500"
-                    style={{
-                      height: `${progressPercent}%`,
-                      backgroundColor: color,
-                    }}
-                  />
-                </div>
-                <div className="text-[10px] text-gray-600 mt-2">
-                  {progress?.current || 0}/{progress?.total || 0}
-                </div>
-              </div>
-
-              {/* Elements in this group */}
-              <div className="flex gap-2">
-                {groupElements.map((el) => {
-                  const isSelected = selectedElement?.name === el.name;
-                  const isCompatible = compatibleNames.includes(el.name);
-                  const isDimmed = selectedElement && !isCompatible && !isSelected;
-
-                  return (
-                    <button
-                      key={el.name}
-                      onClick={() => onSelect(el)}
-                      className={`
-                        relative flex flex-col items-center justify-center px-4 py-3 rounded-xl
-                        transition-all duration-200 hover:scale-105 active:scale-95
-                        ${isSelected 
-                          ? 'bg-gradient-to-br from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/50 ring-2 ring-white/50' 
-                          : isCompatible
-                          ? 'bg-gray-700 ring-2 ring-green-500/50 shadow-lg shadow-green-500/20'
-                          : 'bg-gray-800 hover:bg-gray-700'
-                        }
-                        ${isDimmed ? 'opacity-30' : 'opacity-100'}
-                      `}
-                      style={{
-                        borderLeft: `3px solid ${color}`,
-                      }}
-                    >
-                      <span className="text-3xl mb-1">{el.emoji}</span>
-                      <span className="text-xs font-medium whitespace-nowrap">{el.name}</span>
-                      {el.isCustom && (
-                        <span className="absolute -top-1 -right-1 text-[10px] bg-indigo-600 rounded-full px-1.5 py-0.5">
-                          ✨
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <React.Fragment key={group}>
+              <SectionHeader
+                color={info.color}
+                icon={info.icon}
+                label={info.name}
+                count={els.length}
+              />
+              {[...els]
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(renderCard)}
+            </React.Fragment>
           );
         })}
       </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Discovery } from '../types';
 
@@ -13,48 +12,108 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({ isOpen, onClose, history 
     <>
       {/* Backdrop */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity" 
+        <div
           onClick={onClose}
-        ></div>
+          style={{
+            position: 'fixed', inset: 0, zIndex: 90,
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(4px)',
+          }}
+        />
       )}
-      
-      {/* Drawer */}
-      <div className={`
-        fixed top-0 right-0 h-full w-80 bg-gray-800 z-50 shadow-2xl transition-transform duration-300 transform
-        ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-      `}>
-        <div className="p-6 h-full flex flex-col">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold flex items-center gap-3">
-              <i className="fa-solid fa-book-open text-indigo-400"></i>
-              Library
-            </h2>
-            <button onClick={onClose} className="p-2 hover:bg-gray-700 rounded-lg">
-              <i className="fa-solid fa-xmark text-xl"></i>
-            </button>
-          </div>
 
-          <div className="flex-1 overflow-y-auto space-y-4">
-            {history.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <i className="fa-solid fa-hourglass-start text-4xl mb-4 opacity-20"></i>
-                <p>No discoveries yet.</p>
-                <p className="text-sm">Combine elements to fill your book!</p>
+      {/* Drawer */}
+      <div
+        className="grimoire"
+        style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
+      >
+        {/* Header */}
+        <div style={{
+          padding: '14px 16px',
+          borderBottom: '1px solid var(--border)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'rgba(13,11,20,0.8)',
+          flexShrink: 0,
+        }}>
+          <div>
+            <div style={{
+              fontFamily: 'Cinzel, serif', fontSize: '14px', fontWeight: 700,
+              color: 'var(--gold-b)', letterSpacing: '0.08em',
+            }}>
+              📜 Grimoire
+            </div>
+            <div style={{
+              fontFamily: 'Nunito, sans-serif', fontSize: '12px',
+              color: 'var(--text-m)', marginTop: '2px',
+            }}>
+              {history.length} {history.length === 1 ? 'discovery' : 'discoveries'}
+            </div>
+          </div>
+          <button className="act-btn" onClick={onClose}>
+            <i className="fa-solid fa-xmark" />
+          </button>
+        </div>
+
+        {/* Entries */}
+        <div style={{
+          flex: 1, overflowY: 'auto', padding: '10px 12px',
+          display: 'flex', flexDirection: 'column', gap: '6px',
+        }}>
+          {history.length === 0 ? (
+            <div style={{
+              flex: 1, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              gap: '12px', paddingTop: '60px',
+              color: 'var(--text-d)', textAlign: 'center',
+            }}>
+              <span style={{ fontSize: '44px', opacity: 0.12 }}>📜</span>
+              <div style={{ fontFamily: 'Cinzel, serif', fontSize: '12px', letterSpacing: '0.1em' }}>
+                GRIMOIRE EMPTY
               </div>
-            ) : (
-              history.map((item, idx) => (
-                <div key={idx} className="bg-gray-900/50 p-3 rounded-xl border border-gray-700 flex items-center gap-4">
-                  <span className="text-3xl">{item.result.emoji}</span>
-                  <div className="flex-1">
-                    <div className="font-bold text-gray-100">{item.result.name}</div>
-                    <div className="text-xs text-gray-500">
-                      Created by {item.ingredients[0]} + {item.ingredients[1]}
-                    </div>
+              <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '13px', fontWeight: 600 }}>
+                Combine elements to record<br />your discoveries here
+              </div>
+            </div>
+          ) : (
+            history.map((item, idx) => (
+              <div key={idx} className="disc-entry">
+                <span style={{ fontSize: '28px', flexShrink: 0 }}>{item.result.emoji}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: 'Nunito, sans-serif', fontSize: '13px', fontWeight: 800,
+                    color: 'var(--text)', letterSpacing: '0.01em',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    {item.result.name}
+                  </div>
+                  <div style={{
+                    fontFamily: 'Nunito, sans-serif', fontSize: '11px', fontWeight: 600,
+                    color: 'var(--text-d)', marginTop: '2px',
+                  }}>
+                    {item.ingredients[0]} + {item.ingredients[1]}
                   </div>
                 </div>
-              ))
-            )}
+                <span style={{
+                  fontFamily: 'Cinzel, serif', fontSize: '9px',
+                  color: 'var(--text-d)', flexShrink: 0,
+                }}>
+                  #{history.length - idx}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          padding: '8px 16px', borderTop: '1px solid var(--border)',
+          textAlign: 'center', flexShrink: 0,
+        }}>
+          <div style={{
+            fontFamily: 'Cinzel, serif', fontSize: '9px',
+            letterSpacing: '0.2em', color: 'var(--text-d)',
+          }}>
+            ✦ &nbsp; INFINITE ALCHEMY &nbsp; ✦
           </div>
         </div>
       </div>
